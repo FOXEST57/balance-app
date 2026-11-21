@@ -1,12 +1,8 @@
-import 'dart:math' as math;
-
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
-import '../domain/entities/body_composition.dart';
 import '../domain/entities/user_profile.dart';
 import '../domain/entities/weight_measurement.dart';
-import '../domain/services/bia_calculator.dart';
 
 /// Accès à la base de données locale (SQLite via sqflite).
 ///
@@ -26,8 +22,8 @@ class AppDatabase {
   static const String _dbName = 'balance_cardio.db';
   static const int _dbVersion = 4;
 
-  /// Nom du profil principal livré avec l'application.
-  static const String primaryProfileName = 'Pascal';
+  /// Nom du profil par défaut (l'utilisateur le renommera).
+  static const String primaryProfileName = 'Mon profil';
 
   Database? _db;
 
@@ -54,7 +50,8 @@ class AppDatabase {
     await _createMeasurementsTable(db);
     await _createActivityTable(db);
     await _createSettingsTable(db);
-    await _seedPrimaryProfile(db);
+    // Aucun profil ni mesure seedée : l'application démarre vierge.
+    // Le profil par défaut est créé par ProfilesNotifier au premier lancement.
   }
 
   Future<void> _createProfilesTable(Database db) async {
@@ -217,28 +214,10 @@ class AppDatabase {
       'CREATE INDEX idx_measurements_timestamp ON measurements(timestamp DESC)',
     );
     await _createSettingsTable(db);
-
-    // Les deux dernières pesées importées n'ont ni masse grasse ni masse
-    // musculaire : on efface les valeurs estimées par défaut.
-    await db.update(
-      'measurements',
-      <String, Object?>{
-        'fat_percent': null,
-        'fat_kg': null,
-        'muscle_percent': null,
-        'muscle_kg': null,
-      },
-      where: 'timestamp IN (?, ?)',
-      whereArgs: <Object?>[
-        DateTime(2026, 11, 13, 8).millisecondsSinceEpoch,
-        DateTime(2026, 11, 20, 8).millisecondsSinceEpoch,
-      ],
-    );
   }
 
-  /// v2 -> v3 : introduction du multi-profils, du tour de taille, suppression des
-  /// pesées BLE produites par l'ancien décodage erroné, et import de
-  /// l'historique du profil Pascal.
+  /// v2 -> v3 : introduction du multi-profils, du tour de taille, et suppression
+  /// des pesées BLE produites par l'ancien décodage erroné.
   Future<void> _migrateToProfiles(Database db) async {
     await _createProfilesTable(db);
 
@@ -271,15 +250,14 @@ class AppDatabase {
       where: 'source = ?',
       whereArgs: <Object?>[MeasurementSource.ble.name],
     );
-
-    await _insertPrimaryMeasurements(db, profileId);
   }
 
   // ---------------------------------------------------------------------------
   // Données du profil principal
   // ---------------------------------------------------------------------------
 
-  /// Insère le profil principal et renvoie son identifiant.
+  /// Insère un profil générique vierge et renvoie son identifiant.
+  /// Utilisé uniquement par les migrations pour les utilisateurs existants.
   Future<int> _insertPrimaryProfile(
     Database db, {
     Map<String, Object?>? legacy,
@@ -289,15 +267,14 @@ class AppDatabase {
             name: primaryProfileName,
             isActive: true,
             sex: Sex.male,
-            age: 56,
-            heightCm: 188,
+            age: 30,
+            heightCm: 175,
             activityLevel: ActivityLevel.moderate,
-            targetWeightKg: 161.1,
+            targetWeightKg: 70,
           )
         : UserProfile.fromMap(<String, Object?>{
             ...legacy,
-            'age': 56,
-            'height_cm': 188.0,
+            'name': primaryProfileName,
           });
 
     final int id = await db.insert('profiles', <String, Object?>{
@@ -309,145 +286,8 @@ class AppDatabase {
     return id;
   }
 
-  Future<void> _seedPrimaryProfile(Database db) async {
-    final int id = await _insertPrimaryProfile(db);
-    await _insertPrimaryMeasurements(db, id);
-  }
-
-  /// Historique transmis par l'utilisateur. Les pesées sans masse grasse ni
-  /// masse musculaire sont estimées par les équations BIA du profil.
-  static final List<_SeedMeasurement> _seedMeasurements = <_SeedMeasurement>[
-    _SeedMeasurement(
-      date: DateTime(2025, 11, 12, 8),
-      weightKg: 176.6,
-      waistCm: 157,
-      fatMassKg: 65.4,
-      muscleMassKg: 30.33,
-    ),
-    _SeedMeasurement(
-      date: DateTime(2025, 12, 12, 8),
-      weightKg: 165.5,
-      waistCm: 146,
-      fatMassKg: 66.8,
-      muscleMassKg: 29.2,
-    ),
-    _SeedMeasurement(
-      date: DateTime(2026, 9, 28, 8),
-      weightKg: 174.6,
-      waistCm: 154,
-      fatMassKg: 63.62,
-      muscleMassKg: 30.17,
-    ),
-    _SeedMeasurement(
-      date: DateTime(2026, 10, 30, 8),
-      weightKg: 162.2,
-      waistCm: 146,
-      fatMassKg: 58.8,
-      muscleMassKg: 28.5,
-    ),
-    _SeedMeasurement(date: DateTime(2026, 11, 13, 8), weightKg: 162.3, waistCm: 144),
-    _SeedMeasurement(date: DateTime(2026, 11, 20, 8), weightKg: 161.1, waistCm: 144),
-  ];
-
-  Future<void> _insertPrimaryMeasurements(Database db, int profileId) async {
-    final List<Map<String, Object?>> rows = await db.query(
-      'profiles',
-      where: 'id = ?',
-      whereArgs: <Object?>[profileId],
-      limit: 1,
-    );
-    if (rows.isEmpty) return;
-    final UserProfile profile = UserProfile.fromMap(rows.first);
-
-    for (final _SeedMeasurement seed in _seedMeasurements) {
-      final WeightMeasurement measurement = WeightMeasurement(
-        profileId: profileId,
-        timestamp: seed.date,
-        waistCm: seed.waistCm,
-        source: MeasurementSource.manual,
-        composition: _seedComposition(
-          weightKg: seed.weightKg,
-          profile: profile,
-          fatMassKg: seed.fatMassKg,
-          muscleMassKg: seed.muscleMassKg,
-        ),
-      );
-      await db.insert('measurements', measurement.toMap());
-    }
-  }
-
-  /// Compose une composition corporelle : les masses fournies par l'utilisateur
-  /// sont conservées telles quelles, les valeurs absentes (eau, os, IMC,
-  /// métabolisme) proviennent des équations documentées de [BiaCalculator].
-  ///
-  /// Lorsque la masse grasse **et** la masse musculaire sont absentes, aucune
-  /// estimation n'est produite : ces deux grandeurs restent `null` plutôt que
-  /// d'afficher des valeurs incohérentes avec les autres pesées.
-  static BodyComposition _seedComposition({
-    required double weightKg,
-    required UserProfile profile,
-    double? fatMassKg,
-    double? muscleMassKg,
-  }) {
-    final BodyComposition auto = BiaCalculator.compute(
-      weightKg: weightKg,
-      profile: profile,
-    );
-    if (fatMassKg == null || muscleMassKg == null) {
-      return BodyComposition(
-        weightKg: weightKg,
-        impedanceOhm: null,
-        fatPercent: null,
-        fatMassKg: null,
-        musclePercent: null,
-        muscleMassKg: null,
-        waterPercent: auto.waterPercent,
-        waterMassKg: auto.waterMassKg,
-        boneMassKg: auto.boneMassKg,
-        bmi: auto.bmi,
-        bmrKcal: auto.bmrKcal,
-      );
-    }
-
-    final double fatMass = fatMassKg;
-    final double leanMass = math.max(0, weightKg - fatMass);
-    final double muscleMass = muscleMassKg.clamp(0, leanMass).toDouble();
-
-    return BodyComposition(
-      weightKg: weightKg,
-      impedanceOhm: null,
-      fatPercent: weightKg > 0 ? fatMass / weightKg * 100 : 0,
-      fatMassKg: fatMass,
-      musclePercent: weightKg > 0 ? muscleMass / weightKg * 100 : 0,
-      muscleMassKg: muscleMass,
-      waterPercent: auto.waterPercent,
-      waterMassKg: auto.waterMassKg,
-      boneMassKg: auto.boneMassKg,
-      bmi: auto.bmi,
-      // Katch-McArdle : masse grasse connue.
-      bmrKcal: 370 + 21.6 * leanMass,
-    );
-  }
-
   Future<void> close() async {
     await _db?.close();
     _db = null;
   }
-}
-
-/// Description d'une pesée importée manuellement.
-class _SeedMeasurement {
-  const _SeedMeasurement({
-    required this.date,
-    required this.weightKg,
-    required this.waistCm,
-    this.fatMassKg,
-    this.muscleMassKg,
-  });
-
-  final DateTime date;
-  final double weightKg;
-  final double waistCm;
-  final double? fatMassKg;
-  final double? muscleMassKg;
 }
