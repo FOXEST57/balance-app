@@ -54,7 +54,7 @@ class HistoryPage extends ConsumerWidget {
         }
 
         return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(18, 8, 18, kHomeNavBarClearance),
+          padding: EdgeInsets.fromLTRB(18, 8, 18, kHomeNavBarClearance + MediaQuery.of(context).padding.bottom),
           itemCount: items.length + 1,
           separatorBuilder: (_, _) => SizedBox(height: 10),
           itemBuilder: (BuildContext context, int i) {

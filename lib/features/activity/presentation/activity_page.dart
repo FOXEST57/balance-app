@@ -29,7 +29,7 @@ class ActivityPage extends ConsumerWidget {
             style: const TextStyle(color: AppColors.danger)),
       ),
       data: (ActivityState data) => ListView(
-        padding: const EdgeInsets.fromLTRB(18, 8, 18, kHomeNavBarClearance),
+        padding: EdgeInsets.fromLTRB(18, 8, 18, kHomeNavBarClearance + MediaQuery.of(context).padding.bottom),
         children: <Widget>[
           Text('Activité Physique',
               style: AppTheme.numeric(22, weight: FontWeight.w700)),

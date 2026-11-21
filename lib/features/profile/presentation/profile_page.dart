@@ -52,7 +52,7 @@ class _ProfileContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 8, 18, kHomeNavBarClearance),
+      padding: EdgeInsets.fromLTRB(18, 8, 18, kHomeNavBarClearance + MediaQuery.of(context).padding.bottom),
       children: <Widget>[
         Text(
           'Profil & Connexion',

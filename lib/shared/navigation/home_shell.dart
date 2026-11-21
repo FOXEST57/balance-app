@@ -45,9 +45,12 @@ class _HomeShellState extends State<HomeShell> {
         bottom: false,
         child: IndexedStack(index: _index, children: pages),
       ),
-      bottomNavigationBar: _NeonNavBar(
-        index: _index,
-        onChanged: (int i) => setState(() => _index = i),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: _NeonNavBar(
+          index: _index,
+          onChanged: (int i) => setState(() => _index = i),
+        ),
       ),
     );
   }

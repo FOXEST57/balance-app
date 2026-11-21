@@ -31,7 +31,7 @@ class DashboardPage extends ConsumerWidget {
     final bool showLive = weighing.isConnected;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 8, 18, kHomeNavBarClearance),
+      padding: EdgeInsets.fromLTRB(18, 8, 18, kHomeNavBarClearance + MediaQuery.of(context).padding.bottom),
       children: <Widget>[
         // --- En-tête ---------------------------------------------------------
         Row(
