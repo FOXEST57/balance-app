@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance — Téléchargement Android</title>
+    <meta name="description" content="Téléchargez l'application Balance pour Android. Suivi de poids, composition corporelle, activité et santé.">
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --card: #ffffff;
+            --primary: #4f8cff;
+            --primary-dark: #2f6ad8;
+            --text: #1a2236;
+            --muted: #6b7280;
+            --success: #16a34a;
+            --border: #e5e7eb;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 24px 16px 60px;
+        }
+        .container {
+            max-width: 560px;
+            margin: 0 auto;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(30, 60, 120, 0.08);
+            padding: 32px 24px;
+            text-align: center;
+        }
+        .logo {
+            width: 72px;
+            height: 72px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #4f8cff, #6f5cff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: #fff;
+            font-size: 36px;
+            font-weight: 700;
+        }
+        h1 { font-size: 24px; margin-bottom: 6px; }
+        .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+        .version-badge {
+            display: inline-block;
+            background: #eef4ff;
+            color: var(--primary-dark);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-bottom: 20px;
+        }
+        .qr-wrapper {
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .qr-wrapper img {
+            width: 260px;
+            height: 260px;
+            display: block;
+        }
+        .qr-hint {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background .15s ease, transform .05s ease;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:active { transform: scale(0.99); }
+        .btn-secondary {
+            background: #eef2f7;
+            color: var(--text);
+            margin-top: 10px;
+        }
+        .instructions {
+            margin-top: 32px;
+            text-align: left;
+        }
+        .instructions h2 {
+            font-size: 18px;
+            margin-bottom: 14px;
+        }
+        .steps {
+            counter-reset: step;
+            list-style: none;
+        }
+        .steps li {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 14px 16px 14px 52px;
+            margin-bottom: 10px;
+            position: relative;
+            font-size: 14px;
+        }
+        .steps li::before {
+            counter-increment: step;
+            content: counter(step);
+            position: absolute;
+            left: 14px;
+            top: 14px;
+            width: 26px;
+            height: 26px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .steps li code {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .checksum {
+            margin-top: 20px;
+            padding: 12px 14px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: "Courier New", monospace;
+            font-size: 11px;
+            word-break: break-all;
+            color: var(--muted);
+        }
+        .checksum-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+            font-family: inherit;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+        .warning {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-top: 16px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo">B</div>
+            <h1>Balance</h1>
+            <p class="subtitle">Suivi de poids, composition corporelle &amp; activité</p>
+            <span class="version-badge">Version 1.0.0 · Android</span>
+
+            <div class="qr-wrapper">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA+gAAAPoAQMAAAB3bUanAAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAFIUlEQVR4nO3dTXKbMBgGYGWyyNJH4CgczT6aj+IjZOlFJmoLWH8Ip8bNdNp53pWFQM+X5TcSJAQRERER+U9yiN2cbvMv82AoJy8hvKXBOS01D34u+DGPxxjfQ3jtA+90Op1Op9PpdDr939evoU4Gr2kQSjCun/llzGBrLDNVRjqdTqfT6XQ6nU7/E/pLuWwGc4Zp8vPnr+PUSVVZurHqWrz1WKu66HQ6nU6n0+l0Ov079SFdO5VtVZz0t7mUtFKvk6LT6XQ6nU6n0+n0v6CH0sg53m77ldjkXN65URedTqfT6XQ6nU6n/ym9StVJfbZguNW1rDQnn2M7zG/rxKaTqkKn0+l0Op1Op9Ppz+u9nMqNoO1BWPdLvUEndDqdTqfT6XQ6nf6Mfjdv6ebLNO7p1V9wnsavjxh0Op1Op9PpdDqdvkNvO6ll2ZTexwaGNBM2+6W0et4iaveL6HQ6nU6n0+l0On23nnO86VVy85RzSTNzln6pGqS6ctqGi06n0+l0Op1Op9N36/OlpSsaynNslR42/7vNmDqpdKnaFXpN4KKXddHpdDqdTqfT6XT6Pn0jx9vzua7Y3yIK5XZPC1alxHu7QnQ6nU6n0+l0Op3+oN62SL1OaijPvl3W34rOnVR7qC3GW/MUy0HqpOh0Op1Op9PpdDp9t55Xemv6paqUEIoeK2dZKYEf83gs7zmnIuOqk6LT6XQ6nU6n0+n0R/VDs1LbL1UzvWQjXVodaktFVmff6HQ6nU6n0+l0On23PieDOcN0qddWDWWRcz7KJ3tbRNVtI51Op9PpdDqdTqc/rS/90qkcpPRe0Ml1xXK7J3Q3gkICl9DpdDqdTqfT6XT68/qhfEFnKMFYbgQN5bJzKS+tsQ1WRZa30el0Op1Op9PpdPo+PZRv62Tj1MyEL4675Y2gqpRqV6h/wo1Op9PpdDqdTqf/o3ruZVI+y1V6Xc6loX/vrZgiI51Op9PpdDqdTqc/p7fJ/dKlPH02lEVeyh5rTGC/lAzG/gydTqfT6XQ6nU6n79JbMG8RXVMnlXOc7sylnMu9n/N0S7VFtDpWFldnzOh0Op1Op9PpdDp9hx6aFimX0oKrZ+Zfh+Y7Zj1jvLNfRKfT6XQ6nU6n0+mP6nkT5zQ1T7Fzji0NXmKxRbQYOcmoZqq3dapS6HQ6nU6n0+l0On23HtKyseyktkuZs2wexWYjaCyr2Z6JdDqdTqfT6XQ6nf6cvt1JxTQIt5mYilwS751wG+u/sKDO60t0Op1Op9PpdDqd/qB+TfND+YJONQjl2becatlSCqURqlLmm1MnRafT6XQ6nU6n0+lP6cfpalXKklPZY3Vy6LytE9adVGeGTqfT6XQ6nU6n05/RX2I3d9uqz44xTo/lF3SqvDffV6PT6XQ6nU6n0+n03fp2hvTYaT2TKz6ny7E87tapa6OtotPpdDqdTqfT6fTH9UPs5lRuBB2nX3nz6LJeZvv7AtVM+0k1Op1Op9PpdDqdTt+tX5uV8t5PaMClecp6RVWllEYIdzopOp1Op9PpdDqdTt+t5xNu1/JQW04Gj7HOuQG/TFkKnU6n0+l0Op1Op3+fvj2It0Ntq1JCuUVUDebQ6XQ6nU6n0+l0+rfpeRDWX4SuvjywgPOCH+1MKrJ9j4dOp9PpdDqdTqfTn9GrVJ1U9Z86l1d3Lum2FsyJ628S5NDpdDqdTqfT6XT683ovHT03XJcvvgid897o7Xs8dDqdTqfT6XQ6nb5PFxEREZH/ID8AuUhXDb+AwB4AAAAASUVORK5CYII=" alt="QR Code de téléchargement Balance">
+            </div>
+            <p class="qr-hint">Scannez avec l'appareil photo de votre téléphone Android</p>
+
+            <a href="https://github.com/FOXEST57/balance-app/releases/download/v1.0.0/app-release.apk" class="btn btn-primary" download>
+                ⬇ Télécharger l'APK
+            </a>
+            <a href="https://github.com/FOXEST57/balance-app/releases/tag/v1.0.0" class="btn btn-secondary" target="_blank" rel="noopener">
+                Voir la release GitHub
+            </a>
+
+            <div class="warning">
+                <strong>À propos du fichier APK :</strong> Android bloque par défaut l'installation d'applications hors du Play Store. C'est normal, c'est une mesure de sécurité. Suivez les étapes ci-dessous pour autoriser l'installation.
+            </div>
+
+            <div class="checksum">
+                <div class="checksum-label">SHA-256 (vérification d'intégrité)</div>
+                a1e4c59d4627d39149ff7cd0552fa9ac3e8a4a011a70680834e4fd8d3cc87115
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h2>Comment installer l'application</h2>
+            <ol class="steps">
+                <li><strong>Autorisez les sources inconnues.</strong> Quand Android affiche « Bloqué par Play Protect » ou « Installation inconnue bloquée », appuyez sur <strong>Paramètres</strong> puis activez <strong>Autoriser cette source</strong> pour votre navigateur (Chrome, etc.).</li>
+                <li><strong>Acceptez l'installation.</strong> Une boîte de dialogue vous demande si vous voulez installer Balance. Appuyez sur <strong>Installer</strong>.</li>
+                <li><strong>Ouvrez l'app.</strong> Une fois installée, appuyez sur <strong>Ouvrir</strong> pour lancer Balance.</li>
+                <li><strong>Accordez les permissions.</strong> Autorisez le Bluetooth, la localisation et les notifications quand on vous le demande (nécessaires pour connecter votre balance).</li>
+            </ol>
+        </div>
+
+        <p class="footer">© 2026 KreaCode · Balance v1.0.0</p>
+    </div>
+</body>
+</html>
