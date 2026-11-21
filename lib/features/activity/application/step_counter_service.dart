@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pedometer/pedometer.dart';
 
-import '../../weighing/data/settings_repository.dart';
-import '../data/activity_repository.dart';
+import '../../weighing/domain/repositories/i_settings_repository.dart';
 import '../domain/entities/activity_entry.dart';
+import '../domain/repositories/i_activity_repository.dart';
 import '../domain/services/calorie_calculator.dart';
 
 /// Service de comptage de pas via le capteur pédomètre du téléphone.
@@ -19,8 +19,8 @@ import '../domain/services/calorie_calculator.dart';
 class StepCounterService {
   StepCounterService(this._repo, this._settings);
 
-  final ActivityRepository _repo;
-  final SettingsRepository _settings;
+  final IActivityRepository _repo;
+  final ISettingsRepository _settings;
 
   final StreamController<int> _stepsCtrl = StreamController<int>.broadcast();
   StreamSubscription<StepCount>? _sub;

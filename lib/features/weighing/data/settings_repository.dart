@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 
+import '../domain/repositories/i_settings_repository.dart';
 import 'app_database.dart';
 
 /// Clé : identifiant BLE de la dernière balance utilisée (reconnexion auto).
@@ -23,12 +24,13 @@ const String kReminderDayOfWeekKey = 'reminder_day_of_week';
 /// Clé : fréquence du rappel ("weekly" | "biweekly" | "monthly").
 const String kReminderRepeatKey = 'reminder_repeat';
 
-/// Petit magasin clé/valeur persistant (table `settings`).
-class SettingsRepository {
+/// Petit magasin clé/valeur persistant (implémentation SQLite, table `settings`).
+class SettingsRepository implements ISettingsRepository {
   SettingsRepository(this._db);
 
   final AppDatabase _db;
 
+  @override
   Future<String?> read(String key) async {
     final Database db = await _db.database;
     final List<Map<String, Object?>> rows = await db.query(
@@ -40,6 +42,7 @@ class SettingsRepository {
     return rows.isEmpty ? null : rows.first['value'] as String?;
   }
 
+  @override
   Future<void> write(String key, String value) async {
     final Database db = await _db.database;
     await db.insert('settings', <String, Object?>{'key': key, 'value': value},

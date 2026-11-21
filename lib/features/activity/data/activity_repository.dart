@@ -3,9 +3,10 @@ import 'package:sqflite/sqflite.dart';
 import '../../weighing/data/app_database.dart';
 import '../domain/entities/activity_entry.dart';
 import '../domain/entities/activity_type.dart';
+import '../domain/repositories/i_activity_repository.dart';
 
-/// Persistance et lecture des entrées d'activité (table `activity_entries`).
-class ActivityRepository {
+/// Persistance et lecture des entrées d'activité (implémentation SQLite).
+class ActivityRepository implements IActivityRepository {
   ActivityRepository(this._db);
 
   final AppDatabase _db;
@@ -14,12 +15,14 @@ class ActivityRepository {
 
   // --- CRUD ----------------------------------------------------------------
 
+  @override
   Future<ActivityEntry> insert(ActivityEntry entry) async {
     final Database db = await _database;
     final int id = await db.insert('activity_entries', entry.toMap());
     return entry.copyWith(id: id);
   }
 
+  @override
   Future<void> update(ActivityEntry entry) async {
     final int? id = entry.id;
     if (id == null) {
@@ -34,6 +37,7 @@ class ActivityRepository {
     );
   }
 
+  @override
   Future<void> delete(int id) async {
     final Database db = await _database;
     await db.delete('activity_entries', where: 'id = ?', whereArgs: <Object?>[id]);
@@ -42,6 +46,7 @@ class ActivityRepository {
   // --- Requêtes -------------------------------------------------------------
 
   /// Toutes les entrées d'une journée donnée (triées par date de création).
+  @override
   Future<List<ActivityEntry>> forDay(DateTime day) async {
     final int dayStart = ActivityEntry.dayStartOf(day);
     final int dayEnd = dayStart + const Duration(days: 1).inMilliseconds;
@@ -56,6 +61,7 @@ class ActivityRepository {
   }
 
   /// Toutes les entrées entre [from] (inclus) et [to] (exclu).
+  @override
   Future<List<ActivityEntry>> between(DateTime from, DateTime to) async {
     final Database db = await _database;
     final List<Map<String, Object?>> rows = await db.query(
@@ -74,6 +80,7 @@ class ActivityRepository {
   ///
   /// Cette entrée accumule les pas de la journée et est mise à jour
   /// par le service de comptage.
+  @override
   Future<ActivityEntry?> stepsEntryForDay(DateTime day) async {
     final int dayStart = ActivityEntry.dayStartOf(day);
     final Database db = await _database;
@@ -88,6 +95,7 @@ class ActivityRepository {
 
   /// Met à jour (ou crée) l'entrée « pas » de la journée avec de nouvelles
   /// valeurs. Renvoie l'entrée complétée.
+  @override
   Future<ActivityEntry> upsertStepsForDay({
     required DateTime day,
     required int steps,

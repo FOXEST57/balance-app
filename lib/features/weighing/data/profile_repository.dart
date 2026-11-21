@@ -1,15 +1,17 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../domain/entities/user_profile.dart';
+import '../domain/repositories/i_profile_repository.dart';
 import 'app_database.dart';
 
-/// Persistance des profils utilisateur (plusieurs lignes, une seule active).
-class ProfileRepository {
+/// Persistance des profils utilisateur (implémentation SQLite).
+class ProfileRepository implements IProfileRepository {
   ProfileRepository(this._db);
 
   final AppDatabase _db;
 
   /// Tous les profils, le profil actif en premier.
+  @override
   Future<List<UserProfile>> all() async {
     final Database db = await _db.database;
     final List<Map<String, Object?>> rows = await db.query(
@@ -20,6 +22,7 @@ class ProfileRepository {
   }
 
   /// Profil actuellement sélectionné (ou null si aucun profil).
+  @override
   Future<UserProfile?> loadActive() async {
     final Database db = await _db.database;
     final List<Map<String, Object?>> rows = await db.query(
@@ -37,6 +40,7 @@ class ProfileRepository {
   }
 
   /// Crée ou met à jour un profil et renvoie sa version persistée.
+  @override
   Future<UserProfile> save(UserProfile profile) async {
     final Database db = await _db.database;
     final Map<String, Object?> values = profile.toMap()
@@ -57,6 +61,7 @@ class ProfileRepository {
   }
 
   /// Définit [id] comme profil actif et désactive les autres.
+  @override
   Future<void> setActive(int id) async {
     final Database db = await _db.database;
     await db.transaction((Transaction txn) async {
@@ -72,6 +77,7 @@ class ProfileRepository {
 
   /// Supprime un profil. Les pesées rattachées sont supprimées par la
   /// contrainte `ON DELETE CASCADE`.
+  @override
   Future<void> delete(int id) async {
     final Database db = await _db.database;
     await db.transaction((Transaction txn) async {

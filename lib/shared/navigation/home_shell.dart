@@ -27,12 +27,10 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _index = 0;
 
-  static const int _activityIndex = 3;
-
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = <Widget>[
-      DashboardPage(onOpenActivity: () => setState(() => _index = _activityIndex)),
+      const DashboardPage(),
       const TrackingPage(),
       const HistoryPage(),
       const ActivityPage(),

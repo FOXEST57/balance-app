@@ -25,13 +25,13 @@ void main() {
           latestMeasurementProvider.overrideWith((Ref ref) => null),
         ],
         child: MaterialApp(
-          home: Scaffold(body: DashboardPage(onOpenActivity: () {})),
+          home: const Scaffold(body: DashboardPage()),
         ),
       ),
     );
     await tester.pump();
 
     expect(find.text('Pesée en direct'), findsOneWidget);
-    expect(find.text('Bientôt disponible'), findsOneWidget);
+    expect(find.text('Composition corporelle'), findsOneWidget);
   });
 }

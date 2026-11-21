@@ -11,15 +11,12 @@ import '../../weighing/application/scale_service.dart';
 import '../../weighing/domain/entities/body_composition.dart';
 import '../../weighing/domain/entities/weight_measurement.dart';
 import '../../weighing/presentation/widgets/ble_scan_sheet.dart';
-import 'widgets/activity_preview_card.dart';
 import 'widgets/kpi_card.dart';
 import 'widgets/weight_gauge.dart';
 
 /// Écran principal : pesée en direct + synthèse de la dernière mesure.
 class DashboardPage extends ConsumerWidget {
-  const DashboardPage({super.key, required this.onOpenActivity});
-
-  final VoidCallback onOpenActivity;
+  const DashboardPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -162,16 +159,6 @@ class DashboardPage extends ConsumerWidget {
             ),
           ),
         SizedBox(height: 22),
-
-        // --- Module V2 -------------------------------------------------------
-        SectionHeader(
-          title: 'Bientôt disponible',
-          subtitle: 'Préparation de la V2',
-          accent: AppColors.violet,
-        ),
-        SizedBox(height: 12),
-        ActivityPreviewCard(onTap: onOpenActivity),
-        SizedBox(height: 20),
 
         // --- Diagnostic (trame brute) ----------------------------------------
         if (weighing.lastRawHex != null)

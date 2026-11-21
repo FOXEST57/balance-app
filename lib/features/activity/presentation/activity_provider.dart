@@ -3,14 +3,15 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
-import '../../weighing/data/settings_repository.dart';
 import '../../weighing/domain/entities/weight_measurement.dart';
+import '../../weighing/domain/repositories/i_settings_repository.dart';
 import '../application/step_counter_service.dart';
 import '../data/activity_repository.dart';
 import '../domain/entities/activity_daily_summary.dart';
 import '../domain/entities/activity_entry.dart';
 import '../domain/entities/activity_goals.dart';
 import '../domain/entities/activity_type.dart';
+import '../domain/repositories/i_activity_repository.dart';
 import '../domain/services/calorie_calculator.dart';
 
 /// État complet du module Activité.
@@ -66,8 +67,8 @@ class ActivityNotifier extends AsyncNotifier<ActivityState> {
 
   @override
   Future<ActivityState> build() async {
-    final ActivityRepository repo = ref.watch(activityRepositoryProvider);
-    final SettingsRepository settings = ref.watch(settingsRepositoryProvider);
+    final IActivityRepository repo = ref.watch(activityRepositoryProvider);
+    final ISettingsRepository settings = ref.watch(settingsRepositoryProvider);
     final WeightMeasurement? latest = ref.watch(latestMeasurementProvider);
     final double weightKg = latest?.composition.weightKg ?? 80.0;
 
@@ -96,8 +97,8 @@ class ActivityNotifier extends AsyncNotifier<ActivityState> {
   }
 
   Future<ActivityState> _load(
-    ActivityRepository repo,
-    SettingsRepository settings,
+    IActivityRepository repo,
+    ISettingsRepository settings,
   ) async {
     final DateTime now = DateTime.now();
 
@@ -134,7 +135,7 @@ class ActivityNotifier extends AsyncNotifier<ActivityState> {
   }
 
   Future<List<ActivityDailySummary>> _loadRange(
-    ActivityRepository repo,
+    IActivityRepository repo,
     DateTime start,
     int days,
   ) async {
@@ -148,8 +149,8 @@ class ActivityNotifier extends AsyncNotifier<ActivityState> {
   }
 
   Future<void> reload() async {
-    final ActivityRepository repo = ref.read(activityRepositoryProvider);
-    final SettingsRepository settings = ref.read(settingsRepositoryProvider);
+    final IActivityRepository repo = ref.read(activityRepositoryProvider);
+    final ISettingsRepository settings = ref.read(settingsRepositoryProvider);
     state = const AsyncValue<ActivityState>.loading();
     state = AsyncValue<ActivityState>.data(await _load(repo, settings));
   }
@@ -204,7 +205,7 @@ final AsyncNotifierProvider<ActivityNotifier, ActivityState> activityProvider =
       ActivityNotifier.new,
     );
 
-final Provider<ActivityRepository> activityRepositoryProvider =
-    Provider<ActivityRepository>((Ref ref) {
+final Provider<IActivityRepository> activityRepositoryProvider =
+    Provider<IActivityRepository>((Ref ref) {
       return ActivityRepository(ref.watch(appDatabaseProvider));
     });

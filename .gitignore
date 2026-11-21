@@ -12,6 +12,12 @@
 .swiftpm/
 migrate_working_dir/
 
+# Android signing (ne JAMAIS committer ces fichiers)
+android/key.properties
+android/app/*.keystore
+android/app/*.jks
+android/app/*.p12
+
 # IntelliJ related
 *.iml
 *.ipr

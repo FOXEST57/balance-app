@@ -1,15 +1,17 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../domain/entities/weight_measurement.dart';
+import '../domain/repositories/i_measurement_repository.dart';
 import 'app_database.dart';
 
-/// Persistance et lecture de l'historique des pesées.
-class MeasurementRepository {
+/// Persistance et lecture de l'historique des pesées (implémentation SQLite).
+class MeasurementRepository implements IMeasurementRepository {
   MeasurementRepository(this._db);
 
   final AppDatabase _db;
 
   /// Insère une mesure et renvoie l'entité complétée avec son identifiant.
+  @override
   Future<WeightMeasurement> insert(WeightMeasurement measurement) async {
     final Database db = await _db.database;
     final int id = await db.insert('measurements', measurement.toMap());
@@ -18,6 +20,7 @@ class MeasurementRepository {
 
   /// Remplace une mesure existante, notamment pour y ajouter l'impédance reçue
   /// après le verrouillage du poids par la balance.
+  @override
   Future<WeightMeasurement> update(WeightMeasurement measurement) async {
     final int? id = measurement.id;
     if (id == null) {
@@ -36,6 +39,7 @@ class MeasurementRepository {
   /// Renvoie les mesures, de la plus récente à la plus ancienne.
   ///
   /// Si [profileId] est fourni, seules les pesées de ce profil sont renvoyées.
+  @override
   Future<List<WeightMeasurement>> all({int? limit, int? profileId}) async {
     final Database db = await _db.database;
     final List<Map<String, Object?>> rows = await db.query(
@@ -49,6 +53,7 @@ class MeasurementRepository {
   }
 
   /// Dernière mesure enregistrée (ou null).
+  @override
   Future<WeightMeasurement?> latest({int? profileId}) async {
     final List<WeightMeasurement> list = await all(
       limit: 1,
@@ -58,6 +63,7 @@ class MeasurementRepository {
   }
 
   /// Mesures comprises entre [from] et [to], triées chronologiquement.
+  @override
   Future<List<WeightMeasurement>> range(
     DateTime from,
     DateTime to, {
@@ -81,12 +87,14 @@ class MeasurementRepository {
     return rows.map(WeightMeasurement.fromMap).toList();
   }
 
+  @override
   Future<void> delete(int id) async {
     final Database db = await _db.database;
     await db.delete('measurements', where: 'id = ?', whereArgs: <Object?>[id]);
   }
 
   /// Supprime toutes les mesures, ou uniquement celles d'un profil.
+  @override
   Future<void> deleteAll({int? profileId}) async {
     final Database db = await _db.database;
     await db.delete(

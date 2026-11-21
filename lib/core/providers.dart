@@ -11,28 +11,38 @@ import 'package:balance/features/weighing/data/settings_repository.dart';
 import 'package:balance/features/weighing/domain/entities/scale_frame.dart';
 import 'package:balance/features/weighing/domain/entities/user_profile.dart';
 import 'package:balance/features/weighing/domain/entities/weight_measurement.dart';
+import 'package:balance/features/weighing/domain/repositories/i_measurement_repository.dart';
+import 'package:balance/features/weighing/domain/repositories/i_profile_repository.dart';
+import 'package:balance/features/weighing/domain/repositories/i_settings_repository.dart';
 import 'package:balance/features/weighing/domain/services/bia_calculator.dart';
 
 // -----------------------------------------------------------------------------
 // Infrastructure
+//
+// Les providers exposent des **interfaces** (`I*Repository`) et non les
+// implémentations concrètes (SQLite). Cela permet de remplacer la source de
+// données (ex. API distante du projet global) en modifiant uniquement la
+// factory ci-dessous, sans toucher aux consumers.
 // -----------------------------------------------------------------------------
 
 final Provider<AppDatabase> appDatabaseProvider = Provider<AppDatabase>(
   (Ref ref) => AppDatabase.instance,
 );
 
-final Provider<ProfileRepository> profileRepositoryProvider =
-    Provider<ProfileRepository>(
+/// Implémentation SQLite injectée partout où une interface de repository est
+/// demandée. Pour brancher une source distante, remplacer ces factories.
+final Provider<IProfileRepository> profileRepositoryProvider =
+    Provider<IProfileRepository>(
       (Ref ref) => ProfileRepository(ref.watch(appDatabaseProvider)),
     );
 
-final Provider<MeasurementRepository> measurementRepositoryProvider =
-    Provider<MeasurementRepository>(
+final Provider<IMeasurementRepository> measurementRepositoryProvider =
+    Provider<IMeasurementRepository>(
       (Ref ref) => MeasurementRepository(ref.watch(appDatabaseProvider)),
     );
 
-final Provider<SettingsRepository> settingsRepositoryProvider =
-    Provider<SettingsRepository>(
+final Provider<ISettingsRepository> settingsRepositoryProvider =
+    Provider<ISettingsRepository>(
       (Ref ref) => SettingsRepository(ref.watch(appDatabaseProvider)),
     );
 
@@ -61,7 +71,7 @@ final StateProvider<bool> showAllDevicesProvider = StateProvider<bool>(
 class ProfilesNotifier extends AsyncNotifier<List<UserProfile>> {
   @override
   Future<List<UserProfile>> build() async {
-    final ProfileRepository repo = ref.watch(profileRepositoryProvider);
+    final IProfileRepository repo = ref.watch(profileRepositoryProvider);
     List<UserProfile> list = await repo.all();
     if (list.isEmpty) {
       // Premier lancement : on persiste le profil par défaut.
@@ -346,7 +356,7 @@ class WeighingNotifier extends Notifier<WeighingState> {
     String? reminderDayOfWeek;
     String? reminderRepeat;
     try {
-      final SettingsRepository settings = ref.read(settingsRepositoryProvider);
+      final ISettingsRepository settings = ref.read(settingsRepositoryProvider);
       id = await settings.read(kLastScaleIdKey);
       name = await settings.read(kLastScaleNameKey);
       enabled = await settings.read(kAutoConnectEnabledKey);
@@ -421,7 +431,7 @@ class WeighingNotifier extends Notifier<WeighingState> {
     int? dayOfWeek,
     ReminderRepeat? repeat,
   }) async {
-    final SettingsRepository settings = ref.read(settingsRepositoryProvider);
+    final ISettingsRepository settings = ref.read(settingsRepositoryProvider);
     await settings.write(kReminderEnabledKey, enabled ? 'true' : 'false');
     final int h = hour ?? state.reminderHour;
     final int m = minute ?? state.reminderMinute;
@@ -514,7 +524,7 @@ class WeighingNotifier extends Notifier<WeighingState> {
     state = state.copyWith(connected: scale, simulationMode: false);
 
     try {
-      final SettingsRepository settings = ref.read(settingsRepositoryProvider);
+      final ISettingsRepository settings = ref.read(settingsRepositoryProvider);
       await settings.write(kLastScaleIdKey, scale.remoteId);
       await settings.write(kLastScaleNameKey, scale.name);
     } catch (_) {
